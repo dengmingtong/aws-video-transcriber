@@ -88,13 +88,13 @@ async function getVideoInfo(videoId) {
 async function prepareSrtCaptions(videoId, language, translated) {
   const transcribeBucket = process.env.TRANSCRIBE_BUCKET;
   var captionsKey = "";
-  var inputCaptionsKey = "burnedcaptions/" + videoId + ".srt";
+  var inputCaptionsKey = "burnedcaptions/" + videoId + ".vtt";
   if (translated == "true") {
     captionsKey = "captions/" + videoId + "_" + language + ".json";
-    inputCaptionsKey = "burnedcaptions/" + videoId + "_" + language + ".srt";
+    inputCaptionsKey = "burnedcaptions/" + videoId + "_" + language + ".vtt";
   } else {
     captionsKey = "captions/" + videoId + ".json";
-    inputCaptionsKey = "burnedcaptions/" + videoId + ".srt";
+    inputCaptionsKey = "burnedcaptions/" + videoId + ".vtt";
   }
   var captionS3Params = {
     Bucket: transcribeBucket,
@@ -103,14 +103,14 @@ async function prepareSrtCaptions(videoId, language, translated) {
   var captionsObject = await s3.getObject(captionS3Params).promise();
   captionsStr = captionsObject.Body.toString();
   var captions = JSON.parse(captionsStr);
-  var srtCaptions = await exportCaptions("srt", captions, language);
+  var vttCaptions = await exportCaptions("webvtt", captions, language);
 
   await s3
     .putObject({
       Bucket: transcribeBucket,
       Key: inputCaptionsKey,
       ContentType: "binary/octet-stream",
-      Body: srtCaptions,
+      Body: vttCaptions,
     })
     .promise();
 }
@@ -120,14 +120,15 @@ async function burnCaptions(videoId, video, language, translated) {
   var inputCaptionsKey = "";
   var outputNameModifier = "";
   if (translated == "true") {
-    inputCaptionsKey = "burnedcaptions/" + videoId + "_" + language + ".srt";
+    inputCaptionsKey = "burnedcaptions/" + videoId + "_" + language + ".vtt";
     outputNameModifier = "_" + videoId + "_translated";
   } else {
-    inputCaptionsKey = "burnedcaptions/" + videoId + ".srt";
+    inputCaptionsKey = "burnedcaptions/" + videoId + ".vtt";
     outputNameModifier = "_" + videoId + "_";
   }
 
   var inputCaptionsS3Path = "s3://" + transcribeBucket + "/" + inputCaptionsKey;
+  console.log('mingtong test, inputCaptionsS3Path: ', inputCaptionsS3Path);
   var inputVideoS3Path = video["s3VideoPath"];
   var outputVideoS3Path =
     "s3://" +
@@ -195,9 +196,10 @@ async function burnCaptions(videoId, video, language, translated) {
                       FontColor: "WHITE",
                       BackgroundColor: "NONE",
                       OutlineColor: "BLACK",
+                      StylePassthrough: "ENABLED"
                     },
                   },
-                  LanguageCode: "ZHO",
+                  LanguageCode: "ARA",
                 },
               ],
             },
@@ -222,7 +224,7 @@ async function burnCaptions(videoId, video, language, translated) {
           CaptionSelectors: {
             "Captions Selector 1": {
               SourceSettings: {
-                SourceType: "SRT",
+                SourceType: "WEBVTT",
                 FileSourceSettings: {
                   SourceFile: inputCaptionsS3Path,
                 },
