@@ -138,7 +138,7 @@ You can upload videos without captions for processing.
 
 3. Select the video language, select custom vocabulary from **select a vocabulary** if you need (refer to [Custom Vocabulary][transcribe-custom-vocabulary] to learn more about custom vocabulary), and then choose **Start**. The system will start uploading the video and automatically process and generate captions.
 
-![](./images/user-guide-video-upload.png)
+   ![](./images/user-guide-video-upload.png)
 
     Firstly, the video is displayed on the **Processing** tab, and after the captions are generated, the video will be displayed on the **Ready to edit** tab.
 
